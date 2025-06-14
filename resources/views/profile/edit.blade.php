@@ -19,27 +19,35 @@
         </div>
 
         <!-- Profile Edit Form -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 mb-8">
             <div class="px-6 py-4 border-b border-gray-200">
                 <h2 class="text-lg font-semibold text-gray-900">Profile Information</h2>
             </div>
-            
-            <form method="POST" action="{{ route('profile.update') }}" class="p-6 space-y-6">
+            <form method="POST" action="{{ route('profile.update') }}" class="p-6 space-y-6" enctype="multipart/form-data">
                 @csrf
-                
                 <!-- Avatar Section -->
                 <div class="flex items-center space-x-6">
                     <div class="flex-shrink-0">
-                        <div class="w-20 h-20 bg-purple-500 rounded-full flex items-center justify-center text-white text-2xl font-bold">
-                            {{ strtoupper(substr($user->name, 0, 1)) }}
-                        </div>
+                        @if($user->avatar)
+                            <img src="{{ asset('storage/' . $user->avatar) }}" alt="Avatar" class="w-20 h-20 rounded-full object-cover border-2 border-purple-400">
+                        @else
+                            <div class="w-20 h-20 bg-purple-500 rounded-full flex items-center justify-center text-white text-2xl font-bold">
+                                {{ strtoupper(substr($user->name, 0, 1)) }}
+                            </div>
+                        @endif
                     </div>
                     <div>
                         <h3 class="text-sm font-medium text-gray-900">Profile Picture</h3>
-                        <p class="text-sm text-gray-500">This is your avatar based on your name initial</p>
-                        <button type="button" class="mt-2 text-sm text-purple-600 hover:text-purple-800 font-medium">
-                            Change avatar (Coming Soon)
-                        </button>
+                        <input type="file" name="avatar" accept="image/*" class="mt-2 block text-sm text-gray-500">
+                        @error('avatar') <div class="text-danger">{{ $message }}</div> @enderror
+                        @if($user->avatar)
+                            <div class="mt-2">
+                                <label class="inline-flex items-center">
+                                    <input type="checkbox" name="remove_avatar" value="1" class="form-checkbox text-red-500">
+                                    <span class="ml-2 text-sm text-red-600">Remove current avatar</span>
+                                </label>
+                            </div>
+                        @endif
                     </div>
                 </div>
 
@@ -83,55 +91,6 @@
                     @enderror
                 </div>
 
-                <!-- Password Section -->
-                <div class="border-t border-gray-200 pt-6">
-                    <h3 class="text-lg font-medium text-gray-900 mb-4">Change Password</h3>
-                    <div class="space-y-4">
-                        <!-- Current Password -->
-                        <div>
-                            <label for="old_password" class="block text-sm font-medium text-gray-700 mb-2">
-                                <i class="fas fa-lock mr-2 text-gray-400"></i>
-                                Current Password
-                                <span class="text-red-500 ml-1">*</span>
-                            </label>
-                            <input type="password" 
-                                   id="old_password"
-                                   name="old_password" 
-                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors duration-200 @error('old_password') border-red-500 @enderror" 
-                                   required>
-                            @error('old_password') 
-                                <p class="mt-2 text-sm text-red-600">
-                                    <i class="fas fa-exclamation-circle mr-1"></i>
-                                    {{ $message }}
-                                </p>
-                            @enderror
-                        </div>
-
-                        <!-- New Password -->
-                        <div>
-                            <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
-                                <i class="fas fa-key mr-2 text-gray-400"></i>
-                                New Password
-                                <span class="text-sm text-gray-500 font-normal">(Leave blank to keep current password)</span>
-                            </label>
-                            <input type="password" 
-                                   id="password"
-                                   name="password" 
-                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors duration-200 @error('password') border-red-500 @enderror">
-                            @error('password') 
-                                <p class="mt-2 text-sm text-red-600">
-                                    <i class="fas fa-exclamation-circle mr-1"></i>
-                                    {{ $message }}
-                                </p>
-                            @enderror
-                            <p class="mt-2 text-sm text-gray-500">
-                                <i class="fas fa-info-circle mr-1"></i>
-                                Password must be at least 8 characters long
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
                 <!-- Action Buttons -->
                 <div class="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
                     <a href="{{ route('profile.show') }}" 
@@ -148,19 +107,65 @@
             </form>
         </div>
 
-        <!-- Security Notice -->
-        <div class="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <div class="flex items-start">
-                <div class="flex-shrink-0">
-                    <i class="fas fa-shield-alt text-blue-600"></i>
-                </div>
-                <div class="ml-3">
-                    <h3 class="text-sm font-medium text-blue-800">Security Notice</h3>
-                    <p class="mt-1 text-sm text-blue-700">
-                        Your current password is required to make any changes to your profile for security purposes.
-                    </p>
-                </div>
+        <!-- Password Edit Form -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h2 class="text-lg font-semibold text-gray-900">Change Password</h2>
             </div>
+            <form method="POST" action="{{ route('profile.updatePassword') }}" class="p-6 space-y-6">
+                @csrf
+                <div>
+                    <label for="old_password" class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-lock mr-2 text-gray-400"></i>
+                        Current Password
+                        <span class="text-red-500 ml-1">*</span>
+                    </label>
+                    <input type="password" 
+                           id="old_password"
+                           name="old_password" 
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors duration-200 @error('old_password') border-red-500 @enderror" 
+                           required>
+                    @error('old_password') 
+                        <p class="mt-2 text-sm text-red-600">
+                            <i class="fas fa-exclamation-circle mr-1"></i>
+                            {{ $message }}
+                        </p>
+                    @enderror
+                </div>
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-key mr-2 text-gray-400"></i>
+                        New Password
+                    </label>
+                    <input type="password" 
+                           id="password"
+                           name="password" 
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors duration-200 @error('password') border-red-500 @enderror" required>
+                    @error('password') 
+                        <p class="mt-2 text-sm text-red-600">
+                            <i class="fas fa-exclamation-circle mr-1"></i>
+                            {{ $message }}
+                        </p>
+                    @enderror
+                </div>
+                <div>
+                    <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-key mr-2 text-gray-400"></i>
+                        Confirm New Password
+                    </label>
+                    <input type="password" 
+                           id="password_confirmation"
+                           name="password_confirmation" 
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors duration-200" required>
+                </div>
+                <div class="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
+                    <button type="submit" 
+                            class="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors duration-200">
+                        <i class="fas fa-save mr-2"></i>
+                        Change Password
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

@@ -13,9 +13,13 @@
                 <div class="flex flex-col sm:flex-row items-start sm:items-center -mt-16 sm:-mt-12">
                     <!-- Avatar -->
                     <div class="flex-shrink-0 mb-4 sm:mb-0">
-                        <div class="w-24 h-24 bg-white rounded-full flex items-center justify-center text-purple-600 text-3xl font-bold shadow-lg border-4 border-white">
-                            {{ strtoupper(substr($user->name, 0, 1)) }}
-                        </div>
+                        @if($user->avatar)
+                            <img src="{{ asset('storage/' . $user->avatar) }}" alt="Avatar" class="w-24 h-24 rounded-full object-cover border-2 border-purple-400">
+                        @else
+                            <div class="w-24 h-24 bg-purple-500 rounded-full flex items-center justify-center text-white text-4xl font-bold">
+                                {{ strtoupper(substr($user->name, 0, 1)) }}
+                            </div>
+                        @endif
                     </div>
                     
                     <!-- User Info -->
@@ -101,11 +105,14 @@
                     <div class="p-6 hover:bg-gray-50 transition-colors duration-150">
                         <div class="flex items-start space-x-4">
                             <div class="flex-shrink-0">
-                                <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                                    <i class="fas fa-file-alt text-purple-600"></i>
-                                </div>
+                                @if($post->image)
+                                    <img src="{{ asset('storage/' . $post->image) }}" alt="Post Image" class="w-20 h-20 rounded-lg object-cover border-2 border-purple-400">
+                                @else
+                                    <div class="w-20 h-20 bg-purple-100 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-file-alt text-purple-600 text-2xl"></i>
+                                    </div>
+                                @endif
                             </div>
-                            
                             <div class="flex-1 min-w-0">
                                 <div class="flex items-center justify-between">
                                     <h3 class="text-lg font-medium text-gray-900 truncate">{{ $post->title }}</h3>
@@ -120,18 +127,19 @@
                                         </span>
                                     </div>
                                 </div>
-                                
                                 <p class="mt-2 text-gray-600 line-clamp-3">{{ Str::limit($post->content, 200) }}</p>
-                                
                                 <div class="mt-3 flex items-center justify-between">
                                     <span class="text-sm text-gray-500">
                                         <i class="fas fa-clock mr-1"></i>
                                         {{ $post->created_at->diffForHumans() }}
                                     </span>
-                                    
                                     <div class="flex items-center space-x-2">
                                         <a href="#" class="text-purple-600 hover:text-purple-800 text-sm font-medium">
                                             View
+                                        </a>
+                                        <span class="text-gray-300">|</span>
+                                        <a href="{{ route('posts.edit', $post) }}" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                                            Edit
                                         </a>
                                         <span class="text-gray-300">|</span>
                                         <form method="POST" action="{{ route('posts.destroy', $post) }}" class="inline" 

@@ -45,11 +45,16 @@
                 </div>
                 
                 <!-- Desktop User Avatar with Dropdown -->
-                <div class="hidden md:block relative" x-data="{ open: false }">
+                @auth
+                <div class="relative group hidden md:block" x-data="{ open: false }">
                     <button @click="open = !open" class="flex items-center focus:outline-none">
-                        <div class="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center text-white font-semibold hover:bg-purple-600 transition-colors duration-200">
-                            {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
-                        </div>
+                        @if(Auth::user()->avatar)
+                            <img src="{{ asset('storage/' . Auth::user()->avatar) }}" alt="Avatar" class="w-9 h-9 rounded-full object-cover border-2 border-purple-400">
+                        @else
+                            <span class="inline-flex items-center justify-center w-9 h-9 bg-purple-500 text-white rounded-full text-lg font-bold">
+                                {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                            </span>
+                        @endif
                     </button>
                     
                     <!-- Desktop Profile Dropdown -->
@@ -97,6 +102,7 @@
                         </form>
                     </div>
                 </div>
+                @endauth
             </div>
         </div>
     </div>

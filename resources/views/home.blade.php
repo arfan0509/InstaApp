@@ -38,9 +38,13 @@
             <div class="p-4 border-b border-gray-200">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center">
-                        <div class="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-bold">
-                            {{ strtoupper(substr($post->user->name, 0, 1)) }}
-                        </div>
+                        @if($post->user->avatar)
+                            <img src="{{ asset('storage/' . $post->user->avatar) }}" alt="Avatar" class="w-10 h-10 rounded-full object-cover border-2 border-purple-400">
+                        @else
+                            <span class="inline-flex items-center justify-center w-10 h-10 bg-purple-500 text-white rounded-full text-lg font-bold">
+                                {{ strtoupper(substr($post->user->name, 0, 1)) }}
+                            </span>
+                        @endif
                         <div class="ml-3">
                             <h4 class="font-semibold text-gray-800">{{ $post->user->name }}</h4>
                             <p class="text-sm text-gray-500">{{ $post->created_at->diffForHumans() }}</p>
@@ -92,9 +96,13 @@
                     <div class="space-y-2 mb-4">
                         @foreach($post->comments as $comment)
                             <div class="flex items-start space-x-2 bg-gray-50 rounded-lg p-2">
-                                <div class="w-6 h-6 bg-gradient-to-r from-blue-500 to-green-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
-                                    {{ strtoupper(substr($comment->user->name, 0, 1)) }}
-                                </div>
+                                @if($comment->user->avatar)
+                                    <img src="{{ asset('storage/' . $comment->user->avatar) }}" alt="Avatar" class="w-8 h-8 rounded-full object-cover border-2 border-purple-400">
+                                @else
+                                    <span class="inline-flex items-center justify-center w-8 h-8 bg-purple-500 text-white rounded-full text-base font-bold">
+                                        {{ strtoupper(substr($comment->user->name, 0, 1)) }}
+                                    </span>
+                                @endif
                                 <div class="flex-1">
                                     <div class="flex items-center justify-between">
                                         <span class="font-medium text-sm text-gray-800">{{ $comment->user->name }}</span>
