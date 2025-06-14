@@ -7,10 +7,8 @@
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Profile Header -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-8">
-            <div class="bg-gradient-to-r from-purple-500 to-blue-600 h-32"></div>
-            
-            <div class="px-6 pb-6">
-                <div class="flex flex-col sm:flex-row items-start sm:items-center -mt-16 sm:-mt-12">
+            <div class="px-6 py-8">
+                <div class="flex flex-col sm:flex-row items-center">
                     <!-- Avatar -->
                     <div class="flex-shrink-0 mb-4 sm:mb-0">
                         @if($user->avatar)
@@ -21,26 +19,20 @@
                             </div>
                         @endif
                     </div>
-                    
                     <!-- User Info -->
-                    <div class="sm:ml-6 flex-1">
-                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                            <div>
-                                <h1 class="text-2xl font-bold text-gray-900">{{ $user->name }}</h1>
-                                <p class="text-gray-600 mt-1">{{ $user->email }}</p>
-                                <div class="flex items-center mt-2 text-sm text-gray-500">
-                                    <i class="fas fa-calendar-alt mr-2"></i>
-                                    Joined {{ $user->created_at->format('F Y') }}
-                                </div>
-                            </div>
-                            
-                            <div class="mt-4 sm:mt-0">
-                                <a href="{{ route('profile.edit') }}" class="inline-flex items-center px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg transition-colors duration-200">
-                                    <i class="fas fa-edit mr-2"></i>
-                                    Edit Profile
-                                </a>
-                            </div>
+                    <div class="sm:ml-6 flex-1 text-center sm:text-left">
+                        <h1 class="text-2xl font-bold text-gray-900">{{ $user->name }}</h1>
+                        <p class="text-gray-600 mt-1">{{ $user->email }}</p>
+                        <div class="flex items-center justify-center sm:justify-start mt-2 text-sm text-gray-500">
+                            <i class="fas fa-calendar-alt mr-2"></i>
+                            Joined {{ $user->created_at->format('F Y') }}
                         </div>
+                    </div>
+                    <div class="mt-4 sm:mt-0 sm:ml-6">
+                        <a href="{{ route('profile.edit') }}" class="inline-flex items-center px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg transition-colors duration-200">
+                            <i class="fas fa-edit mr-2"></i>
+                            Edit Profile
+                        </a>
                     </div>
                 </div>
             </div>

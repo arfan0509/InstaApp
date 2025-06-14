@@ -10,13 +10,15 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body class="bg-gray-100 min-h-screen">
-    @if (in_array(Route::currentRouteName(), ['home', 'profile.show', 'profile.edit']))
-        <!-- Include Navbar for specific routes -->
-    @include('layouts.navbar')
-@endif
+    @php
+        $showNavbar = Auth::check() && !in_array(Route::currentRouteName(), ['login', 'register']);
+    @endphp
+    @if ($showNavbar)
+        @include('layouts.navbar')
+    @endif
 
     <!-- Main Content -->
-    <main class="@auth pt-16 @endauth">
+    <main class="{{ $showNavbar ? 'pt-16' : '' }}">
         <!-- Flash Messages -->
         @if(session('success'))
             <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mx-4 mt-4" role="alert">
