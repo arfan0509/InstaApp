@@ -52,5 +52,6 @@
         //     // CSRF token is now set
         // });
     </script>
+    @stack('scripts')
 </body>
 </html>

@@ -21,7 +21,7 @@
             <form action="{{ route('posts.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 <div class="mb-4">
-                    <textarea name="content" rows="3" 
+                    <textarea name="content" rows="3" id="postContent" 
                               class="w-full px-0 py-2 border-0 focus:outline-none focus:ring-0 resize-none text-gray-800 placeholder-gray-500" 
                               placeholder="What's on your mind?" required></textarea>
                 </div>
@@ -32,7 +32,6 @@
                             <i class="fas fa-image text-xl"></i>
                             <input type="file" name="image" accept="image/*" class="hidden">
                         </label>
-                        <i class="fas fa-smile text-xl text-yellow-500"></i>
                     </div>
                     <button type="submit" 
                             class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg font-medium text-sm transition duration-200">
@@ -90,29 +89,20 @@
             <div class="p-4">
                 <div class="flex items-center justify-between mb-3">
                     <div class="flex items-center space-x-4">
-                        <!-- Like Button -->
-                        <button onclick="toggleLike({{ $post->id }})" 
+                        <!-- Like Button + Count -->
+                        <button onclick="toggleLike({{ $post->id }})"
                                 class="flex items-center space-x-1 hover:text-gray-600 transition-colors">
                             <i class="fas fa-heart text-xl {{ $post->isLikedBy(Auth::user()) ? 'text-red-500' : 'text-gray-700' }}" 
                                id="like-icon-{{ $post->id }}"></i>
+                            <span class="text-sm font-semibold text-gray-900" id="like-count-{{ $post->id }}">{{ $post->likesCount() }}</span>
                         </button>
-                        
-                        <!-- Comment Button -->
-                        <button onclick="openCommentModal({{ $post->id }})" 
+                        <!-- Comment Button + Count -->
+                        <button onclick="openCommentModal({{ $post->id }})"
                                 class="flex items-center space-x-1 text-gray-700 hover:text-gray-600 transition-colors">
                             <i class="fas fa-comment text-xl"></i>
-                        </button>
-                        
-                        <!-- Share Button -->
-                        <button class="flex items-center space-x-1 text-gray-700 hover:text-gray-600 transition-colors">
-                            <i class="fas fa-paper-plane text-xl"></i>
+                            <span class="text-sm font-semibold text-gray-900">{{ $post->comments->count() }}</span>
                         </button>
                     </div>
-                    
-                    <!-- Bookmark -->
-                    <button class="text-gray-700 hover:text-gray-600 transition-colors">
-                        <i class="fas fa-bookmark text-xl"></i>
-                    </button>
                 </div>
 
                 <!-- Like Count -->
@@ -154,7 +144,7 @@
                     @endif
                     <form action="{{ route('comments.store', $post) }}" method="POST" class="flex-1 flex">
                         @csrf
-                        <input type="text" name="content" 
+                        <input type="text" name="content" id="commentInput-{{ $post->id }}"
                                class="flex-1 px-0 py-2 border-0 focus:outline-none focus:ring-0 text-sm placeholder-gray-500" 
                                placeholder="Add a comment..." required>
                         <button type="submit" class="text-blue-500 hover:text-blue-600 font-medium text-sm">
@@ -182,6 +172,7 @@
 
 @include('posts.comment-modal')
 
+@push('scripts')
 <script>
 let currentPostId = null;
 
@@ -288,6 +279,38 @@ function loadComments(postId) {
                 
                 modalContent.appendChild(commentElement);
             });
+            
+            // Setelah menampilkan komentar, inject form komentar ke modal
+            const modalAddComment = document.getElementById('modalAddComment');
+            modalAddComment.innerHTML = `
+                <form id="modalCommentForm" class="flex items-center space-x-2">
+                    <input type="text" id="modalCommentInput" class="flex-1 px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-200 text-sm" placeholder="Add a comment..." required>
+                    <button type="submit" class="text-blue-500 hover:text-blue-600 font-medium text-sm">Post</button>
+                </form>
+            `;
+            // Event submit form modal
+            document.getElementById('modalCommentForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const input = document.getElementById('modalCommentInput');
+                const content = input.value.trim();
+                if (!content || !currentPostId) return;
+                fetch(`/posts/${currentPostId}/comments`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ content })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        loadComments(currentPostId);
+                    }
+                    input.value = '';
+                });
+            });
         })
         .catch(error => {
             console.error('Error loading comments:', error);
@@ -357,4 +380,5 @@ document.getElementById('commentModal').addEventListener('click', function(e) {
     }
 });
 </script>
+@endpush
 @endsection
