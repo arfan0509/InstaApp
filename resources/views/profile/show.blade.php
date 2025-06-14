@@ -134,10 +134,6 @@
                                         {{ $post->created_at->diffForHumans() }}
                                     </span>
                                     <div class="flex items-center space-x-2">
-                                        <a href="#" class="text-purple-600 hover:text-purple-800 text-sm font-medium">
-                                            View
-                                        </a>
-                                        <span class="text-gray-300">|</span>
                                         <a href="{{ route('posts.edit', $post) }}" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
                                             Edit
                                         </a>

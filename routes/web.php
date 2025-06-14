@@ -29,7 +29,9 @@ Route::middleware('auth')->group(function () {
     // Post routes
     Route::post('/posts', [PostController::class, 'store'])->name('posts.store');
     Route::delete('/posts/{post}', [PostController::class, 'destroy'])->name('posts.destroy');
-    
+    Route::get('/posts/{post}/edit', [PostController::class, 'edit'])->name('posts.edit');
+    Route::post('/posts/{post}/edit', [PostController::class, 'update'])->name('posts.update');
+
     // Like routes
     Route::post('/posts/{post}/like', [LikeController::class, 'toggle'])->name('posts.like');
     

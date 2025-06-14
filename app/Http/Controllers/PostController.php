@@ -55,4 +55,27 @@ class PostController extends Controller
 
         return redirect()->route('home')->with('success', 'Post deleted successfully!');
     }
+
+    public function edit($id)
+    {
+        $post = \App\Models\Post::findOrFail($id);
+        if ($post->user_id !== Auth::id()) {
+            abort(403, 'Unauthorized action.');
+        }
+        return view('posts.edit', compact('post'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $post = \App\Models\Post::findOrFail($id);
+        if ($post->user_id !== Auth::id()) {
+            abort(403, 'Unauthorized action.');
+        }
+        $request->validate([
+            'content' => 'required|string',
+        ]);
+        $post->content = $request->content;
+        $post->save();
+        return redirect()->route('profile.show')->with('success', 'Post updated!');
+    }
 }
