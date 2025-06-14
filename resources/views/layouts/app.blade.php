@@ -47,10 +47,10 @@
             csrfToken: '{{ csrf_token() }}'
         };
         
-        // Setup AJAX headers
-        fetch('/sanctum/csrf-cookie').then(() => {
-            // CSRF token is now set
-        });
+        // // Setup AJAX headers
+        // fetch('/sanctum/csrf-cookie').then(() => {
+        //     // CSRF token is now set
+        // });
     </script>
 </body>
 </html>

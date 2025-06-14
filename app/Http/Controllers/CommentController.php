@@ -20,4 +20,16 @@ class CommentController extends Controller
 
         return redirect()->back()->with('success', 'Comment added!');
     }
+
+    public function destroy($id)
+    {
+        $comment = \App\Models\Comment::findOrFail($id);
+        $user = auth()->user();
+        // Hanya pemilik komentar atau pemilik post yang boleh hapus
+        if ($comment->user_id !== $user->id && $comment->post->user_id !== $user->id) {
+            abort(403, 'Unauthorized action.');
+        }
+        $comment->delete();
+        return redirect()->back()->with('success', 'Comment deleted!');
+    }
 }

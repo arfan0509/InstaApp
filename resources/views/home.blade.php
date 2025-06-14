@@ -51,14 +51,19 @@
                         </div>
                     </div>
                     @if($post->user_id === Auth::id())
-                        <form action="{{ route('posts.destroy', $post) }}" method="POST" 
-                              onsubmit="return confirm('Are you sure you want to delete this post?')">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="text-red-500 hover:text-red-700">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </form>
+                        <div class="flex items-center space-x-2">
+                            <a href="{{ route('posts.edit', $post) }}" class="text-blue-500 hover:text-blue-700">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <form action="{{ route('posts.destroy', $post) }}" method="POST" 
+                                  onsubmit="return confirm('Are you sure you want to delete this post?')">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="text-red-500 hover:text-red-700">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
+                        </div>
                     @endif
                 </div>
             </div>
