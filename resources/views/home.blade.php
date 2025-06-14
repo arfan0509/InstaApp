@@ -33,7 +33,6 @@
                             <input type="file" name="image" accept="image/*" class="hidden">
                         </label>
                         <i class="fas fa-smile text-xl text-yellow-500"></i>
-                        <i class="fas fa-map-marker-alt text-xl text-red-500"></i>
                     </div>
                     <button type="submit" 
                             class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg font-medium text-sm transition duration-200">
@@ -181,46 +180,7 @@
     @endif
 </div>
 
-<!-- Comment Modal -->
-<div id="commentModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
-    <div class="flex items-center justify-center min-h-screen p-4">
-        <div class="bg-white rounded-lg w-full max-w-md max-h-[80vh] flex flex-col">
-            <!-- Modal Header -->
-            <div class="flex items-center justify-between p-4 border-b border-gray-200">
-                <h3 class="text-lg font-semibold text-gray-900">Comments</h3>
-                <button onclick="closeCommentModal()" class="text-gray-400 hover:text-gray-600">
-                    <i class="fas fa-times text-xl"></i>
-                </button>
-            </div>
-            
-            <!-- Modal Content -->
-            <div id="modalContent" class="flex-1 overflow-y-auto p-4">
-                <!-- Comments will be loaded here -->
-            </div>
-            
-            <!-- Add Comment Form in Modal -->
-            <div class="border-t border-gray-200 p-4">
-                <div class="flex items-center space-x-3">
-                    @if(Auth::user()->avatar)
-                        <img src="{{ asset('storage/' . Auth::user()->avatar) }}" alt="Avatar" class="w-8 h-8 rounded-full object-cover">
-                    @else
-                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-                            <span class="text-white font-bold text-sm">{{ strtoupper(substr(Auth::user()->name, 0, 1)) }}</span>
-                        </div>
-                    @endif
-                    <form id="modalCommentForm" class="flex-1 flex">
-                        <input type="text" id="modalCommentInput" 
-                               class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" 
-                               placeholder="Add a comment..." required>
-                        <button type="submit" class="ml-2 text-blue-500 hover:text-blue-600 font-medium text-sm px-3">
-                            Post
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+@include('posts.comment-modal')
 
 <script>
 let currentPostId = null;
@@ -272,6 +232,7 @@ function closeCommentModal() {
     document.getElementById('commentModal').classList.add('hidden');
     document.body.style.overflow = 'auto';
     currentPostId = null;
+    location.reload(); // refresh halaman home setelah modal ditutup
 }
 
 function loadComments(postId) {
@@ -295,19 +256,31 @@ function loadComments(postId) {
             data.comments.forEach(comment => {
                 const commentElement = document.createElement('div');
                 commentElement.className = 'flex items-start space-x-3 mb-4';
-                
                 const avatarHtml = comment.user.avatar 
                     ? `<img src="/storage/${comment.user.avatar}" alt="Avatar" class="w-10 h-10 rounded-full object-cover">`
                     : `<div class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
                            <span class="text-white font-bold text-sm">${comment.user.name.charAt(0).toUpperCase()}</span>
                        </div>`;
-                
+                let actionHtml = '';
+                if (comment.can_delete) {
+                    actionHtml = `
+                        <div class="relative ml-2">
+                            <button class="text-gray-400 hover:text-gray-600 focus:outline-none" onclick="toggleDropdown(this)">
+                                <i class="fas fa-ellipsis-h"></i>
+                            </button>
+                            <div class="hidden absolute right-0 mt-2 w-24 bg-white border rounded shadow z-10">
+                                <button onclick="deleteComment(${comment.id})" class="block w-full text-left px-4 py-2 text-red-600 hover:bg-red-50">Hapus</button>
+                            </div>
+                        </div>
+                    `;
+                }
                 commentElement.innerHTML = `
                     ${avatarHtml}
                     <div class="flex-1">
                         <div class="flex items-center space-x-2 mb-1">
                             <span class="font-semibold text-sm text-gray-900">${comment.user.name}</span>
                             <span class="text-xs text-gray-500">${comment.created_at_human}</span>
+                            ${actionHtml}
                         </div>
                         <p class="text-sm text-gray-900">${comment.content}</p>
                     </div>
@@ -334,6 +307,7 @@ document.getElementById('modalCommentForm').addEventListener('submit', function(
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
+            'Accept': 'application/json', // tambahkan ini!
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
         },
         body: JSON.stringify({ content: content })
@@ -349,6 +323,32 @@ document.getElementById('modalCommentForm').addEventListener('submit', function(
         console.error('Error posting comment:', error);
     });
 });
+
+function toggleDropdown(btn) {
+    const dropdown = btn.nextElementSibling;
+    if (dropdown) {
+        dropdown.classList.toggle('hidden');
+    }
+}
+
+function deleteComment(commentId) {
+    if (!confirm('Are you sure you want to delete this comment?')) return;
+    fetch(`/comments/${commentId}`, {
+        method: 'POST', // spoofing DELETE
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ _method: 'DELETE' })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            loadComments(currentPostId);
+        }
+    });
+}
 
 // Close modal when clicking outside
 document.getElementById('commentModal').addEventListener('click', function(e) {
