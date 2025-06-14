@@ -32,4 +32,19 @@ class CommentController extends Controller
         $comment->delete();
         return redirect()->back()->with('success', 'Comment deleted!');
     }
+
+    public function index(Post $post)
+    {
+        $comments = $post->comments()->with('user')->latest()->get()->map(function($comment) {
+            $human = $comment->created_at->diffForHumans(null, true);
+            $human = str_replace([
+                ' seconds', ' second', ' minutes', ' minute', ' hours', ' hour', ' days', ' day', ' weeks', ' week', ' months', ' month', ' years', ' year'
+            ], [
+                's', 's', 'm', 'm', 'h', 'h', 'd', 'd', 'w', 'w', 'mo', 'mo', 'y', 'y'
+            ], $human);
+            $comment->created_at_human = $human . ' ago';
+            return $comment;
+        });
+        return response()->json(['comments' => $comments]);
+    }
 }
