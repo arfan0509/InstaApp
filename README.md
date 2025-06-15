@@ -49,13 +49,19 @@
     php artisan migrate
     ```
 
-7. **Jalankan server Laravel**
+7. **Akses Storage**
+
+    ```sh
+    php artisan storage:link
+    ```
+
+8. **Jalankan server Laravel**
 
     ```sh
     php artisan serve
     ```
 
-8. **Akses aplikasi**
+9. **Akses aplikasi**
    Buka browser dan akses [http://localhost:8000](http://localhost:8000).
 
 ---
