@@ -25,12 +25,17 @@
                               class="w-full px-0 py-2 border-0 focus:outline-none focus:ring-0 resize-none text-gray-800 placeholder-gray-500" 
                               placeholder="What's on your mind?" required></textarea>
                 </div>
-                
+                <div class="mb-4 relative" id="previewContainer" style="display:none;">
+                    <img id="imagePreview" src="#" alt="Image Preview" class="w-full max-h-64 rounded-lg mb-2 object-cover" />
+                    <button type="button" id="removeImageBtn" class="absolute top-2 left-2 bg-white bg-opacity-80 rounded-full p-1 shadow hover:bg-red-500 hover:text-white transition">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
                 <div class="flex items-center justify-between">
                     <div class="flex items-center space-x-4">
                         <label class="cursor-pointer text-green-600 hover:text-green-700">
                             <i class="fas fa-image text-xl"></i>
-                            <input type="file" name="image" accept="image/*" class="hidden">
+                            <input type="file" name="image" accept="image/*" class="hidden" id="imageInput">
                         </label>
                     </div>
                     <button type="submit" 
@@ -92,7 +97,7 @@
                         <!-- Like Button + Count -->
                         <button onclick="toggleLike({{ $post->id }})"
                                 class="flex items-center space-x-1 hover:text-gray-600 transition-colors">
-                            <i class="fas fa-heart text-xl {{ $post->isLikedBy(Auth::user()) ? 'text-red-500' : 'text-gray-700' }}" 
+                            <i class="fas fa-heart text-xl {{ $post->isLikedBy(Auth::user()) ? 'text-red-500' : 'text-gray-700' }}"
                                id="like-icon-{{ $post->id }}"></i>
                             <span class="text-sm font-semibold text-gray-900" id="like-count-{{ $post->id }}">{{ $post->likesCount() }}</span>
                         </button>
@@ -104,15 +109,6 @@
                         </button>
                     </div>
                 </div>
-
-                <!-- Like Count -->
-                @if($post->likesCount() > 0)
-                    <div class="mb-2">
-                        <span class="font-semibold text-sm text-gray-900" id="like-count-{{ $post->id }}">
-                            {{ $post->likesCount() }} {{ $post->likesCount() === 1 ? 'like' : 'likes' }}
-                        </span>
-                    </div>
-                @endif
 
                 <!-- Comments Preview -->
                 @if($post->comments->count() > 0)
@@ -174,7 +170,35 @@
 
 @push('scripts')
 <script>
-let currentPostId = null;
+document.addEventListener('DOMContentLoaded', function() {
+    const imageInput = document.getElementById('imageInput');
+    const imagePreview = document.getElementById('imagePreview');
+    const previewContainer = document.getElementById('previewContainer');
+    const removeImageBtn = document.getElementById('removeImageBtn');
+    if (imageInput) {
+        imageInput.addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    imagePreview.src = e.target.result;
+                    previewContainer.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            } else {
+                imagePreview.src = '#';
+                previewContainer.style.display = 'none';
+            }
+        });
+    }
+    if (removeImageBtn) {
+        removeImageBtn.addEventListener('click', function() {
+            imageInput.value = '';
+            imagePreview.src = '#';
+            previewContainer.style.display = 'none';
+        });
+    }
+});
 
 function toggleLike(postId) {
     fetch(`/posts/${postId}/like`, {
@@ -188,7 +212,6 @@ function toggleLike(postId) {
     .then(data => {
         const likeIcon = document.getElementById(`like-icon-${postId}`);
         const likeCount = document.getElementById(`like-count-${postId}`);
-        
         if (data.liked) {
             likeIcon.classList.remove('text-gray-700');
             likeIcon.classList.add('text-red-500');
@@ -196,19 +219,16 @@ function toggleLike(postId) {
             likeIcon.classList.remove('text-red-500');
             likeIcon.classList.add('text-gray-700');
         }
-        
         if (likeCount) {
-            if (data.likes_count > 0) {
-                likeCount.textContent = `${data.likes_count} ${data.likes_count === 1 ? 'like' : 'likes'}`;
-            } else {
-                likeCount.style.display = 'none';
-            }
+            likeCount.textContent = data.likes_count;
         }
     })
     .catch(error => {
         console.error('Error:', error);
     });
 }
+
+let currentPostId = null;
 
 function openCommentModal(postId) {
     currentPostId = postId;
