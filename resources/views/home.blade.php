@@ -67,10 +67,18 @@
                 </div>
                 
                 @if($post->user_id === Auth::id())
-                    <div class="flex items-center space-x-2">
-                        <button class="text-gray-400 hover:text-gray-600">
+                    <div class="flex items-center space-x-2 relative">
+                        <button class="text-gray-400 hover:text-gray-600 focus:outline-none" onclick="togglePostDropdown(this)">
                             <i class="fas fa-ellipsis-h"></i>
                         </button>
+                        <div class="hidden absolute right-0 mt-2 w-32 bg-white border rounded shadow z-20 dropdown-menu">
+                            <a href="{{ route('posts.edit', $post->id) }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Edit Post</a>
+                            <form action="{{ route('posts.destroy', $post->id) }}" method="POST" onsubmit="return confirm('Yakin hapus postingan?')">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="block w-full text-left px-4 py-2 text-red-600 hover:bg-red-50">Hapus Post</button>
+                            </form>
+                        </div>
                     </div>
                 @endif
             </div>
@@ -338,34 +346,34 @@ function loadComments(postId) {
 }
 
 // Handle modal comment form submission
-document.getElementById('modalCommentForm').addEventListener('submit', function(e) {
-    e.preventDefault();
+// document.getElementById('modalCommentForm').addEventListener('submit', function(e) {
+//     e.preventDefault();
     
-    const input = document.getElementById('modalCommentInput');
-    const content = input.value.trim();
+//     const input = document.getElementById('modalCommentInput');
+//     const content = input.value.trim();
     
-    if (!content || !currentPostId) return;
+//     if (!content || !currentPostId) return;
     
-    fetch(`/posts/${currentPostId}/comments`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json', // tambahkan ini!
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-        },
-        body: JSON.stringify({ content: content })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            input.value = '';
-            loadComments(currentPostId);
-        }
-    })
-    .catch(error => {
-        console.error('Error posting comment:', error);
-    });
-});
+//     fetch(`/posts/${currentPostId}/comments`, {
+//         method: 'POST',
+//         headers: {
+//             'Content-Type': 'application/json',
+//             'Accept': 'application/json', // tambahkan ini!
+//             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+//         },
+//         body: JSON.stringify({ content: content })
+//     })
+//     .then(response => response.json())
+//     .then(data => {
+//         if (data.success) {
+//             input.value = '';
+//             loadComments(currentPostId);
+//         }
+//     })
+//     .catch(error => {
+//         console.error('Error posting comment:', error);
+//     });
+// });
 
 function toggleDropdown(btn) {
     const dropdown = btn.nextElementSibling;
@@ -394,11 +402,28 @@ function deleteComment(commentId) {
 }
 
 // Close modal when clicking outside
-document.getElementById('commentModal').addEventListener('click', function(e) {
-    if (e.target === this) {
-        closeCommentModal();
-    }
-});
+var commentModal = document.getElementById('commentModal');
+if (commentModal) {
+    commentModal.addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeCommentModal();
+        }
+    });
+}
+
+window.togglePostDropdown = function(btn) {
+    const menu = btn.nextElementSibling;
+    document.querySelectorAll('.dropdown-menu').forEach(el => {
+        if (el !== menu) el.classList.add('hidden');
+    });
+    menu.classList.toggle('hidden');
+    document.addEventListener('click', function handler(e) {
+        if (!btn.parentNode.contains(e.target)) {
+            menu.classList.add('hidden');
+            document.removeEventListener('click', handler);
+        }
+    });
+}
 </script>
 @endpush
 @endsection
