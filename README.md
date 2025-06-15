@@ -33,12 +33,15 @@
     - Edit file `.env` dan sesuaikan konfigurasi database sesuai kebutuhan.
     - Atau Buat database baru dengan nama `instaapp_db`
     - Edit file `.env` dan pastikan konfigurasi berikut:
-      DB_CONNECTION=mysql
-      DB_HOST=127.0.0.1
-      DB_PORT=3306
-      DB_DATABASE=instaapp_db
-      DB_USERNAME=(username database anda)
-      DB_PASSWORD=(password username anda)
+
+    ```sh
+    DB_CONNECTION=mysql
+    DB_HOST=127.0.0.1
+    DB_PORT=3306
+    DB_DATABASE=instaapp_db
+    DB_USERNAME=(username database anda)
+    DB_PASSWORD=(password username anda)
+    ```
 
 6. **Jalankan migrasi database**
 
